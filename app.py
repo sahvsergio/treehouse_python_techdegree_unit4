@@ -23,7 +23,8 @@ def clean_quantity(qty_str):
 
 
 def clean_price(price_str):
-    pass
+    price_float=float(price_str)
+    return int(price_float*100)
    
    
     
