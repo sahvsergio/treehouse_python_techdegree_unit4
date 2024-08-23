@@ -4,6 +4,7 @@ import csv
 import sys
 import datetime
 import os
+import time
 
 
 def menu():
@@ -24,13 +25,48 @@ def menu():
             input(
                 '''
                 \rPlease enter one of the options above
+                
                 \rletters a, b or v only
-                \rPress enter to try again''')
+                
+                \rPress enter to try again:''')
+        print()
 
 
 def view_product():
-    product = input('Please enter the id of the product ')
-    pass
+    try:
+        product_id = int(input('Please enter the id of the product: '))
+        print()
+        print()
+        desired_product=session.query(Product).filter(Product.product_id==product_id)
+        if desired_product!=None:
+            for product in desired_product:
+                print(f'''
+                      Product Name: {product.product_name}
+                      Product Quantity:{product.product_quantity} units
+                      Product Price:${product.product_price}            
+                      Date last updated:{product.date_updated}          
+              '''
+              )
+        if product_id >len(session.query(Product).all()):
+            raise Exception('This  product id is not valid, please try again ')
+        
+    except ValueError:
+        print(f'Please enter a valid value for the id -a number from  1-{len(session.query(Product).all())}')
+        view_product()
+    except Exception as e:
+        print()
+        print(e)
+        print()
+        view_product()
+    else:
+        time.sleep(5)
+        print('returning to main menu')
+        time.sleep(10)
+        
+        
+        
+        
+    
 
 
 def add_product():
@@ -72,16 +108,21 @@ def add_csv():
         data = csv.DictReader(csvfile)
 
         for row in data:
-            product_name = row['product_name']
-            product_price = clean_price(row['product_price'])
-            product_quantity = clean_quantity(row['product_quantity'])
-            date_updated = clean_date(row['date_updated'])
-            new_product=Product(product_name = product_name, product_quantity = product_quantity, product_price = product_price, date_updated = date_updated )
-            session.add(new_product)
+            product_in_db=session.query(Product).filter(Product.product_name==row['product_name']).one_or_none()
+            if product_in_db==None:
+                product_name = row['product_name']
+                product_price = clean_price(row['product_price'])
+                product_quantity = clean_quantity(row['product_quantity'])
+                date_updated = clean_date(row['date_updated'])
+                new_product=Product(product_name = product_name, product_quantity = product_quantity, product_price = product_price, date_updated = date_updated )
+                session.add(new_product)
+           
+                
         session.commit()
 
 
 def app():
+    add_csv()
     app_running = True
     while app_running:
         choice = menu()
