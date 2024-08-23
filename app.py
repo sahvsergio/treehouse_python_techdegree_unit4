@@ -25,9 +25,9 @@ def menu():
             input(
                 '''
                 \rPlease enter one of the options above
-                
+
                 \rletters a, b or v only
-                
+
                 \rPress enter to try again:''')
         print()
 
@@ -37,21 +37,23 @@ def view_product():
         product_id = int(input('Please enter the id of the product: '))
         print()
         print()
-        desired_product=session.query(Product).filter(Product.product_id==product_id)
-        if desired_product!=None:
+        desired_product = session.query(Product).\
+            filter(Product.product_id == product_id)
+        if desired_product is not None:
             for product in desired_product:
                 print(f'''
                       Product Name: {product.product_name}
                       Product Quantity:{product.product_quantity} units
-                      Product Price:${product.product_price}            
-                      Date last updated:{product.date_updated}          
+                      Product Price:${product.product_price}
+                      Date last updated:{product.date_updated}
               '''
-              )
-        if product_id >len(session.query(Product).all()):
+                      )
+        if product_id > len(session.query(Product).all()):
             raise Exception('This  product id is not valid, please try again ')
-        
+
     except ValueError:
-        print(f'Please enter a valid value for the id -a number from  1-{len(session.query(Product).all())}')
+        print(f'Please enter a valid value for the id\
+            -a number from  1-{len(session.query(Product).all())}')
         view_product()
     except Exception as e:
         print()
@@ -62,11 +64,6 @@ def view_product():
         time.sleep(5)
         print('returning to main menu')
         time.sleep(10)
-        
-        
-        
-        
-    
 
 
 def add_product():
@@ -94,13 +91,11 @@ def clean_quantity(qty_str):
 
 
 def clean_price(price_str):
-    #print(price_str)
-    split_price=price_str.split('$')
-   
-    price_float =float(split_price[1])
-    
-    
-    return int(price_float *100)
+
+    split_price = price_str.split('$')
+
+    price_float = float(split_price[1])
+    return int(price_float * 100)
 
 
 def add_csv():
@@ -108,16 +103,21 @@ def add_csv():
         data = csv.DictReader(csvfile)
 
         for row in data:
-            product_in_db=session.query(Product).filter(Product.product_name==row['product_name']).one_or_none()
-            if product_in_db==None:
+            product_in_db = session.query(Product).\
+                filter(Product.product_name == row['product_name']).\
+                one_or_none()
+            if product_in_db is None:
                 product_name = row['product_name']
                 product_price = clean_price(row['product_price'])
                 product_quantity = clean_quantity(row['product_quantity'])
                 date_updated = clean_date(row['date_updated'])
-                new_product=Product(product_name = product_name, product_quantity = product_quantity, product_price = product_price, date_updated = date_updated )
+                new_product = Product(product_name=product_name,
+                                      product_quantity=product_quantity,
+                                      product_price=product_price,
+                                      date_updated=date_updated
+                                      )
                 session.add(new_product)
-           
-                
+
         session.commit()
 
 
@@ -146,12 +146,7 @@ def app():
                 \rletters a, b or v only
                 \rPress enter to try again: ''')
 
-      
-
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     app()
- 
-   
-    
