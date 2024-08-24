@@ -3,11 +3,19 @@ from models import (Base, session,
 import csv
 import sys
 import datetime
+
 import os
 import time
 
 
 def menu():
+    '''
+    Menu
+    creates a menu for the application
+    args:None
+    Returns:str
+
+    '''
     while True:
         print(
             '''
@@ -32,6 +40,8 @@ def menu():
         print()
 
 
+
+
 def view_product():
     try:
         product_id = int(input('Please enter the id of the product: '))
@@ -44,7 +54,7 @@ def view_product():
                 print(f'''
                       Product Name: {product.product_name}
                       Product Quantity:{product.product_quantity} units
-                      Product Price:${product.product_price}
+                      Product Price:${product.product_price/100:.2f}
                       Date last updated:{product.date_updated}
               '''
                       )
@@ -67,7 +77,17 @@ def view_product():
 
 
 def add_product():
-    pass
+    
+    
+    product_name=input('Please enter a product name')
+    product_quantity=input('Please enter the quantity of the product')
+    product_price=input('Please enter the price for the product')
+    transformed_price=clean_price(product_price)
+    
+    product_added=Product(product_name=product_name, product_quantity=product_quantity, product_price=transformed_price)
+    session.add(product_added)
+    session.commit()
+    
 
 
 def create_backup():
@@ -91,21 +111,24 @@ def clean_quantity(qty_str):
 
 
 def clean_price(price_str):
-
-    split_price = price_str.split('$')
-
-    price_float = float(split_price[1])
-    return int(price_float * 100)
+    if '$' in price_str:
+        split_price = price_str.split('$')
+        price_float = float(split_price[1])
+    else:
+        price_float = float(price_str)
+    return int(price_float *100)
 
 
 def add_csv():
-    with open('inventory.csv') as csvfile:
-        data = csv.DictReader(csvfile)
+    with open('inventory.csv') as inventory_csv:
+        data = csv.DictReader(inventory_csv)
 
         for row in data:
+            
             product_in_db = session.query(Product).\
                 filter(Product.product_name == row['product_name']).\
                 one_or_none()
+                
             if product_in_db is None:
                 product_name = row['product_name']
                 product_price = clean_price(row['product_price'])
@@ -117,8 +140,31 @@ def add_csv():
                                       date_updated=date_updated
                                       )
                 session.add(new_product)
+            session.commit()
+            if product_in_db is not None:
+                if product_in_db.product_name==row['product_name']:
+                    
+                    
+                    date_in_db=product_in_db.date_updated
+                   
+                    csv_date=clean_date(row['date_updated'])
+                    if date_in_db>csv_date:
+                       print(' the database is updated for product',product_in_db.product_name)
+                       
+                    elif date_in_db<csv_date:
+                        print('this date is higher on the cv ')
+                        print('Updating the database with input csv for product:',product_in_db.product_name)
+                    
+                        product_in_db.product_price = clean_price(row['product_price'])
+                        product_in_db.product_quantity = clean_quantity(row['product_quantity'])
+                        product_in_db.date_updated = clean_date(row['date_updated'])
+                        print(session.dirty)
+                        
+                        
+                       
+                        
+                    
 
-        session.commit()
 
 
 def app():
@@ -132,8 +178,8 @@ def app():
             pass
 
         elif choice == 'a':
-            # add a product
-            pass
+            add_product()
+         
 
         elif choice == 'b':
             # create backup
