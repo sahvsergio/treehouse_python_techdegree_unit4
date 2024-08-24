@@ -158,7 +158,7 @@ def add_csv():
                         product_in_db.product_price = clean_price(row['product_price'])
                         product_in_db.product_quantity = clean_quantity(row['product_quantity'])
                         product_in_db.date_updated = clean_date(row['date_updated'])
-                        print(session.dirty)
+                        session.commit()
                         
                         
                        
