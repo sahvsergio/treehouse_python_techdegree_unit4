@@ -83,10 +83,21 @@ def add_product():
     product_quantity=input('Please enter the quantity of the product')
     product_price=input('Please enter the price for the product')
     transformed_price=clean_price(product_price)
-    
-    product_added=Product(product_name=product_name, product_quantity=product_quantity, product_price=transformed_price)
-    session.add(product_added)
-    session.commit()
+    product_in_db = session.query(Product).\
+        filter(Product.product_name == product_name).\
+        one_or_none()
+    if product_in_db is None:
+        product_added=Product(product_name=product_name, product_quantity=product_quantity, product_price=transformed_price)
+        session.add(product_added)
+        session.commit()
+    elif product_in_db is not None:
+        print('Product already in the system, updating with new details')
+        product_in_db.product_price = clean_price(product_price)
+        product_in_db.product_quantity = clean_quantity(product_quantity)
+        product_in_db.date_updated = datetime.datetime.now()
+        
+        session.commit()
+        
     
 
 
