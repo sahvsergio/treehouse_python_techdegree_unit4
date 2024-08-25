@@ -177,11 +177,11 @@ def create_backup():
                 )
     with open('backup2.csv', 'w') as backup_csv2:
         field_names2 = [
-            'product_id',
-            'product_name',
-            'product_quantity',
-            'product_price',
-            'date_updated'
+            'Product Id',
+            'Product Name',
+            'Product Quantity',
+            'Product Price',
+            'Date Updated',
             ]
         backup_writer = csv.DictWriter(backup_csv2, fieldnames=field_names2)
         backup_writer.writeheader()
@@ -189,11 +189,11 @@ def create_backup():
         for datum in data:
             backup_writer.writerow(
                 {
-                    'product_id': datum.product_id,
-                    'product_name': datum.product_name,
-                    'product_quantity': datum.product_quantity,
-                    'product_price': datum.product_price,
-                    'date_updated': datum.date_updated
+                    'Product Id': datum.product_id,
+                    'Product Name': datum.product_name,
+                    'Product Quantity': datum.product_quantity,
+                    'Product Price': datum.product_price,
+                    'Date Updated': datum.date_updated
                 }
                 )
     print('backup1.csv and backup2.csv were successfully created')
