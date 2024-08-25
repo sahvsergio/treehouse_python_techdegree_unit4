@@ -1,11 +1,7 @@
 import datetime
+from sqlalchemy import create_engine, Column, Integer, String, Date
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-from sqlalchemy import (create_engine, Column, Integer,
-                        String, Date)
-from sqlalchemy.orm import (DeclarativeBase,
-                            mapped_column)
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import sessionmaker
 
 
 # Initialize Sqlite database
