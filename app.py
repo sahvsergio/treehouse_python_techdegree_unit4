@@ -80,9 +80,23 @@ def add_product():
     
     
     product_name=input('Please enter a product name')
-    product_quantity=input('Please enter the quantity of the product')
-    product_price=input('Please enter the price for the product')
-    transformed_price=clean_price(product_price)
+    try:
+        product_quantity=int(input('Please enter the quantity of the product'))
+    except ValueError:
+        print('Please enter only whole numbers')
+        product_quantity = int(
+            input('Please enter the quantity of the product'))
+    try:
+        product_price=input('Please enter the price for the product')
+        transformed_price = clean_price(product_price)
+        if type(transformed_price)!=int:
+            raise Exception('Please enter a valid value for the  price ')
+    except Exception as e:
+        print(e)
+        product_price = input('Please enter the price for the product')
+        transformed_price = clean_price(product_price)
+        
+   
     product_in_db = session.query(Product).\
         filter(Product.product_name == product_name).\
         one_or_none()
@@ -102,9 +116,64 @@ def add_product():
 
 
 def create_backup():
-    pass
+    
+    with open('backup1.csv','w') as backup_csv1:
+        field_names1 = [
+            'product_id',
+            'product_name',
+            'product_quantity',
+            'product_price',
+            'date_updated'
+            ]
+        
+        backup_writer=csv.DictWriter(backup_csv1,fieldnames=field_names1)
+        backup_writer.writeheader()
+        data=session.query(Product).all()
+        for datum in data:
+            backup_writer.writerow(
+                {
+                    'product_id':datum.product_id,
+                    'product_name':datum.product_name,
+                    'product_quantity':datum.product_quantity,
+                    'product_price':datum.product_price,
+                    'date_updated':datum.date_updated
+                }
+                )
+    with open('backup2.csv','w') as backup_csv2:
+        field_names1 = [
+            'product_id',
+            'product_name',
+            'product_quantity',
+            'product_price',
+            'date_updated'
+            ]        
+        backup_writer=csv.DictWriter(backup_csv2,fieldnames=field_names1)
+        backup_writer.writeheader()
+        data=session.query(Product).all()
+        for datum in data:
+            backup_writer.writerow(
+                {
+                    'product_id':datum.product_id,
+                    'product_name':datum.product_name,
+                    'product_quantity':datum.product_quantity,
+                    'product_price':datum.product_price,
+                    'date_updated':datum.date_updated
+                }
+                )
+                
+                
+                
+                
 
-
+              
+           
+        
+        
+      
+       
+      
+       
+       
 def clean_date(date_str):
     '''Turns the string into a date object'''
 
@@ -132,6 +201,7 @@ def clean_price(price_str):
 
 def add_csv():
     with open('inventory.csv') as inventory_csv:
+        
         data = csv.DictReader(inventory_csv)
 
         for row in data:
@@ -179,21 +249,29 @@ def add_csv():
 
 
 def app():
-    add_csv()
+   
     app_running = True
     while app_running:
-        choice = menu()
+        choice = menu()       
+        try:
+            add_csv()
+        except (FileNotFoundError):
+            print('No source csv found, please review')
+            pass        
+        
         if choice == 'v':
             # view a single product
             view_product()
-            pass
+          
 
         elif choice == 'a':
+            # add a product
             add_product()
+            
          
 
         elif choice == 'b':
-            # create backup
+            create_backup()
             pass
         else:
             app_running = False
@@ -202,8 +280,11 @@ def app():
                 \rPlease enter one of the options above
                 \rletters a, b or v only
                 \rPress enter to try again: ''')
+        print('Thank you for using our system')
+        sys.exit()
 
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     app()
+    
